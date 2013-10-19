@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>MindCrack LP Child's Play Charity Charts</title>
+	<script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+</head>
+<body>
+
+<noscript>Please enable JavaScript to see the charts.</noscript>
+<div id="mclpcpc" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+<div id="averagedonation" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+
+<script>
+$(function () {
+	// Initial setup
+	var date_category = [],
+		donations_data = [],
+		contributions_data = [],
+		average_data = [],
+		series = [];
+	
+	$.get('http://johanjensen.dk/mindcracklpcpccharts/data.csv', function (data) {
+		// Split the lines
+		var lines = data.split('\n');
+		
+		// Iterate over the lines (csv-style) and add categories or series
+		$.each(lines, function(lineNo, line) {
+			var items = line.split(',');
+			// header line containes categories
+			if (lineNo == 0) {
+				$.each(items, function(itemNo, item) {
+					series.push(item);
+				});
+			} else {
+				// the rest of the lines contain data with timestamp first
+				var timestamp = parseInt(items[0],10)*1000;
+				donations_data.push([timestamp, parseInt(items[1],10)]);
+				contributions_data.push([timestamp, parseInt(items[2],10)]);
+				average_data.push([timestamp, parseFloat(parseFloat(items[3]).toFixed(2))]);
+			}
+		});
+		
+		// Default config. Type and xAxis-type
+		var config = {
+			chart: { type: 'spline' },
+			title: {
+				text: 'Mindcrack LP Charity',
+			},
+			xAxis: {
+				type: 'datetime',
+			}
+		};
+		var custom = {
+			// Multiple yAxis
+			yAxis: [{
+				title: { text: 'USD' }
+			},{
+				title: { text: 'Contributors' },
+				opposite: true,
+			}],
+			tooltip: {
+				shared: true
+			},
+			// Multiple series. Belongs to a yAxis.
+			series: [{
+				name: series[1],
+				data: donations_data,
+				tooltip: { valuePrefix: '$' },
+				yAxis: 0,
+			},{
+				name: series[2],
+				data: contributions_data,
+				tooltip: { valuePrefix: '#' },
+				yAxis: 1,
+			}]
+		};
+		var new_config = $.extend({}, config, custom);
+		$('#mclpcpc').highcharts(new_config);
+		
+		var custom = {
+			subtitle: { text: 'Average Donation' },
+			yAxis: {
+				title: { text: 'USD' }
+			},
+			series: [{
+				name: series[3],
+				data: average_data,
+				tooltip: { valuePrefix: '$' },
+			}],
+		};
+		var new_config = $.extend({}, config, custom);
+		$('#averagedonation').highcharts(new_config);
+	});
+});	
+</script>
+</body>
+</html>
