@@ -20,7 +20,7 @@ $(function () {
 		average_data = [],
 		series = [];
 	
-	$.get('http://josso.github.io/mindcracklpcpccharts/data.csv', function (data) {
+	$.get('./data.csv', function (data) {
 		// Split the lines
 		var lines = data.split('\n');
 		
@@ -43,12 +43,16 @@ $(function () {
 		
 		// Default config. Type and xAxis-type
 		var config = {
-			chart: { type: 'spline' },
+			chart: {
+				type: 'spline',
+				zoomType: 'x',
+			},
 			title: {
 				text: 'Mindcrack LP Charity',
 			},
 			xAxis: {
 				type: 'datetime',
+				minRange: 2 * 3600*1000,
 			}
 		};
 		var custom = {
@@ -60,7 +64,7 @@ $(function () {
 				opposite: true,
 			}],
 			tooltip: {
-				shared: true
+				shared: true,
 			},
 			// Multiple series. Belongs to a yAxis.
 			series: [{
